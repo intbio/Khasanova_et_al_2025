@@ -1,7 +1,6 @@
-## Предсказанные структуры комплексов ПТФ с белками хроматина
+## Predicted by AF2 Multimer structures of Oct4 with nuclear proteins selected by metrics
 [Back](https://intbio.org/PTF_PPI/)
 
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
