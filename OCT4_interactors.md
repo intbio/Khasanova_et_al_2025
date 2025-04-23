@@ -107,9 +107,17 @@
                         // Initially hide the structure
                         component.setVisibility(false);
                         
-                        // Add cartoon representation
+                        // Add representations with fixed colors for chains A and B
                         component.addRepresentation('cartoon', {
-                            "color": getColor(index),
+                            "sele": ":A",
+                            "color": "#D6D6D6",  // серый
+                            "aspectRatio": 2,
+                            "radius": 1.5
+                        });
+                        
+                        component.addRepresentation('cartoon', {
+                            "sele": ":B",
+                            "color": "#FFF2CC",  // светло-желтый
                             "aspectRatio": 2,
                             "radius": 1.5
                         });
@@ -130,22 +138,15 @@
                 
                 if (structureComponents[index]) {
                     structureComponents[index].setVisibility(isChecked);
-                }
-                
-                // Auto-view when first structure is selected
-                if (isChecked) {
-                    structureComponents[index].autoView();
+                    
+                    // Auto-view when structure is selected
+                    if (isChecked) {
+                        structureComponents[index].autoView();
+                    }
                 }
             });
         });
         
-        // Helper function to get distinct colors for each structure
-        function getColor(index) {
-            var colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A'];
-            return colors[index % colors.length];
-        }
     </script>
-</body>
-</html>
 </body>
 </html>
