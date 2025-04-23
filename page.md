@@ -1,92 +1,151 @@
 ## Предсказанные структуры комплексов ПТФ с белками хроматина
 [Back](https://intbio.org/PTF_PPI/)
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protein Structure Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #viewport {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-<br>
-  <p style="color:#d6d6d6;font-size:22px;font-family:verdana;font-weight: bold;text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;display: inline">Integrin aV (PDB ID 1L5G, chain A)</p>
-  <br />
-  <p style="color:#FFF2CC;font-size:22px;font-family:verdana;font-weight: bold;text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;display: inline">Integrin b3 (PDB ID 1L5G, chain B)</p>
-
-<table border="solid 1px;" style="font-size:14px;">
-<tr>
-<th> Show </th> <th> ПТФ </th> <th> Белок-партнер, UniProt ID </th><th> Белок-партнер, ген </th><th> iPTM </th><th>ipSAE </th><th> pDockQ </th><th> Скачать структуру </th>
-</tr>
-
-<tbody>
-  
-  <script src="https://unpkg.com/ngl@2.0.0-dev.35/dist/ngl.js"></script>
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-  <script>
-  
-
-   var names = ['structures/Q01860_Q9H867_aligned1.pdb',
- 'structures/Q01860_P60510_aligned1.pdb',
- 'structures/Q01860_Q96G04_aligned1.pdb',
- 'structures/Q01860_P62249_aligned1.pdb']
-   var models = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-   var genes = [0.676,0.676,0.676,0.636,]
-   var proteins = [0.505,-7.235,-1.036,-4.986,]
-   var iptm = ['NA','-12.3 ± 0.98','-10.1 ± 1.41','-12.78 ± 1.86','-5.5 ± 1.32',]
-   var ipsae = ['NA','-12.3 ± 0.98','-10.1 ± 1.41','-12.78 ± 1.86','-5.5 ± 1.32',]
-   var pdockq = ['NA','-12.3 ± 0.98','-10.1 ± 1.41','-12.78 ± 1.86','-5.5 ± 1.32',]
-   peptide_reps = [];
-    $(document).ready(function() {
-      window.stage = new NGL.Stage("viewport",{ backgroundColor:"#FFFFFF" });
-      window.stage.loadFile("structures/Q01860_P62249_aligned1.pdb").then(function (ref_pdb) {
-        var aspectRatio = 2;
-        var radius = 1.5;
-
-        ref_pdb.addRepresentation('cartoon', {
-           "sele": ":A", "color": 0xd6d6d6,"aspectRatio":aspectRatio, "radius":radius,"radiusSegments":1,"capped":0 });;
-	ref_pdb.addRepresentation('cartoon', {
-           "sele": ":B", "color": '#FFF2CC',"aspectRatio":aspectRatio, "radius":radius,"radiusSegments":1,"capped":0 });;
-        ref_pdb.autoView();
-      });
-
-      var arrayLength = names.length;
-      var k;
-
-  //   var hyper_scheme = NGL.ColormakerRegistry.addSelectionScheme([
-  //       ["orange", ".CA"],
-  //       ['0xecf0f1', '_H'],
-  //       ["blue", "_N"],
-  //       ["red", "_O"],
-  //       ["cyan", "*"]
-  //     ], "DA");
-		// for (k = 0; k < arrayLength; k++) {
-  //           window.stage.loadFile(`${names[k]}`).then(function (ref_pdb) {
-  //               var repr = ref_pdb.addRepresentation('hyperball', {
-  //                  "sele": ":C", "color": hyper_scheme});
-  //               repr.setVisibility(false);
-  //               peptide_reps.push(repr);
-               
-  //         	});
-		// }
-
-    window.stage.viewerControls.spin( [ 0, 1, 0 ],110 )
-    });
-    var arrayLength = names.length;
-			for (var i = 0; i < arrayLength; i++) {
+    <div class="container">
+        <h1>Protein Structure Viewer</h1>
         
-        document.write(`<tr><td> <input type="checkbox" id="${i}" name="${genes[i]}"></td> <td>  ${proteins[i]}  </td> <td> ${iptm[i]} </td><td> ${ipsae[i]} </td></td><td> ${pdockq[i]} </td><td> <a href="https://intbio.org/PTF_PPI/${names[i]}" download>PDB</a> </td></tr>`); 
-			}
-		  
-      
-$('input[type=checkbox]').on('change', toggle_reference_structure);
+        <div id="viewport"></div>
+        
+        <h2>Structures Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Show</th>
+                    <th>Gene</th>
+                    <th>Protein</th>
+                    <th>IPTM</th>
+                    <th>IPSAE</th>
+                    <th>pDockQ</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody id="structures-table">
+                <!-- Table content will be generated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
 
-function toggle_reference_structure() {
-               var state = $(this).is(":checked");
-               var nameid = $(this).attr('id');
-               peptide_reps[nameid].setVisibility(state)
-          }
+    <script src="https://unpkg.com/ngl@2.0.0-dev.35/dist/ngl.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script>
+        var names = [
+            'structures/Q01860_Q9H867_aligned1.pdb',
+            'structures/Q01860_P60510_aligned1.pdb',
+            'structures/Q01860_Q96G04_aligned1.pdb',
+            'structures/Q01860_P62249_aligned1.pdb'
+        ];
+        var genes = ['A', 'B', 'C', 'D'];
+        var proteins = ['A1', 'B2', 'C1', 'D1'];
+        var iptm = ['0.75 ± 0.05', '0.82 ± 0.03', '0.68 ± 0.07', '0.79 ± 0.04'];
+        var ipsae = ['0.65 ± 0.08', '0.71 ± 0.06', '0.59 ± 0.09', '0.70 ± 0.05'];
+        var pdockq = ['0.85 ± 0.02', '0.88 ± 0.01', '0.80 ± 0.03', '0.87 ± 0.02'];
+        
+        var structureComponents = [];
 
-  </script>
-  <div id="viewport" style="width:500px; height:500px; border: thin solid black"></div>
-  </tbody>	
-</table>
+        $(document).ready(function() {
+            // Initialize NGL Stage
+            window.stage = new NGL.Stage("viewport", { backgroundColor: "#FFFFFF" });
+            
+            // Generate table rows and load structures
+            var tableBody = $('#structures-table');
+            for (var i = 0; i < names.length; i++) {
+                // Add row to table
+                tableBody.append(`
+                    <tr>
+                        <td><input type="checkbox" id="struct-${i}" class="struct-toggle"></td>
+                        <td>${genes[i]}</td>
+                        <td>${proteins[i]}</td>
+                        <td>${iptm[i]}</td>
+                        <td>${ipsae[i]}</td>
+                        <td>${pdockq[i]}</td>
+                        <td><a href="https://intbio.org/PTF_PPI/${names[i]}" download>PDB</a></td>
+                    </tr>
+                `);
+                
+                // Load structure and store component
+                (function(index) {
+                    window.stage.loadFile(names[index]).then(function(component) {
+                        // Initially hide the structure
+                        component.setVisibility(false);
+                        
+                        // Add cartoon representation
+                        component.addRepresentation('cartoon', {
+                            "color": getColor(index),
+                            "aspectRatio": 2,
+                            "radius": 1.5
+                        });
+                        
+                        // Store component reference
+                        structureComponents[index] = component;
+                    });
+                })(i);
+            }
+
+            // Add spin animation
+            window.stage.viewerControls.spin([0, 1, 0], 0.1);
+
+            // Add event listener for checkboxes
+            $('.struct-toggle').on('change', function() {
+                var index = $(this).attr('id').split('-')[1];
+                var isChecked = $(this).is(":checked");
+                
+                if (structureComponents[index]) {
+                    structureComponents[index].setVisibility(isChecked);
+                }
+                
+                // Auto-view when first structure is selected
+                if (isChecked) {
+                    structureComponents[index].autoView();
+                }
+            });
+        });
+        
+        // Helper function to get distinct colors for each structure
+        function getColor(index) {
+            var colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A'];
+            return colors[index % colors.length];
+        }
+    </script>
+</body>
+</html>
 </body>
 </html>
