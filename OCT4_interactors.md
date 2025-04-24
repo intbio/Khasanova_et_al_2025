@@ -39,6 +39,8 @@
     </style>
 </head>
 <body>
+    <p style="color:#D6D6D6;font-size:22px;font-family:verdana;font-weight: bold;text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;display: inline">Oct4</p>
+    <p style="color:#FFF2CC;font-size:22px;font-family:verdana;font-weight: bold;text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;display: inline">Protein Partner</p>
     <div class="container">
         <h1>Protein Structure Viewer</h1>
         
