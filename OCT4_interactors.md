@@ -123,6 +123,27 @@ document.addEventListener('DOMContentLoaded', async function() {
     const table = $('#structures-table').DataTable({
       responsive: true,
       pageLength: 10,
+      order: [[1, 'asc']], 
+      columnDefs: [
+        {
+          targets: 0, 
+          orderable: false 
+        },
+        {
+          targets: [3, 4, 5], 
+          type: 'num', 
+          render: function(data, type) {
+            if (type === 'sort') {
+              return parseFloat(data.match(/>([0-9.]+)</)[1]);
+            }
+            return data; 
+          }
+        },
+        {
+          targets: 6, 
+          orderable: false 
+        }
+      ],
       data: dataRows.map((row, index) => {
         const cols = row.split(',');
         if (cols.length < 6) {
