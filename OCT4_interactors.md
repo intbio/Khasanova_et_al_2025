@@ -54,6 +54,27 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
     background-color: #56497a;
     color: white;
   }
+  #structures-table thead th.sorting { 
+  cursor: pointer;
+  position: relative;
+  padding-right: 20px;
+}
+  #structures-table thead th.sorting:after {
+  content: "⇅";
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.3;
+}
+  #structures-table thead th.sorting_asc:after {
+  content: "↑";
+  opacity: 1;
+}
+  #structures-table thead th.sorting_desc:after {
+  content: "↓";
+  opacity: 1;
+}
 </style>
 
 <div class="header text-center">
