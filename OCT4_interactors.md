@@ -354,17 +354,19 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
   }
 });
       // Функция обновления заголовка
+// Функция обновления заголовка
 function updateProteinTitle() {
-  const oct4Label = `<span class="oct4-label">OCT4</span>`;
-  
   if (window.selectedProteins.length === 0) {
-    $('#partner-name').html(`${oct4Label} + <span class="partner-label">Protein Partner</span>`);
+    // Если ничего не выбрано, показываем стандартный текст
+    $('#partner-name').html(`<span class="partner-label">Protein Partner</span>`);
   } else {
+    // Формируем список выбранных партнеров
     const partnerLabels = window.selectedProteins.map(protein => 
       `<span class="partner-label" data-pdb="${protein.file}">${protein.name}</span>`
     ).join(' + ');
     
-    $('#partner-name').html(`${oct4Label} + ${partnerLabels}`);
+    // Обновляем заголовок (без повторного OCT4)
+    $('#partner-name').html(partnerLabels);
   }
 }
     })
