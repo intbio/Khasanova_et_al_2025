@@ -223,7 +223,6 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         const component = await window.stage.loadFile(filePath, { ext: "pdb" });
         window.structureComponents[pdbFile] = component;
         
-        // Добавляем представления
         component.addRepresentation('cartoon', {
           sele: ":A", 
           color: "#6b5b95", 
@@ -237,12 +236,11 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
           radius: 1.5
         });
         
-        // Выравниваем по ДНК-связывающему домену OCT4 (цепи A)
         const dnaBindingDomain = new NGL.Selection("(:A and (143-212 or 231-287))");
         component.autoView(dnaBindingDomain, 1000); // Анимация 1 сек
         
         // Можно добавить выделение домена для наглядности
-        component.addRepresentation('licorice', {
+        component.addRepresentation('cartoon', {
           sele: dnaBindingDomain.string,
           color: 'yellow',
           radius: 0.3
