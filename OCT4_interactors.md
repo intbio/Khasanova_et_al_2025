@@ -10,7 +10,7 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
     background-color: #f8f9fa;
   }
   .header {
-    background: linear-gradient(135deg, #6b5b95 0%, #a188d6 100%);
+    background: linear-gradient(135deg, #ffa533 0%, #a188d6 100%);
     color: white;
     padding: 2rem 0;
     margin-bottom: 2rem;
@@ -31,7 +31,7 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
     margin-bottom: 1rem;
   }
   .oct4-label {
-    color: #6b5b95;
+    color: #ffa533;
     font-weight: bold;
   }
   .partner-label {
@@ -43,7 +43,7 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
     padding: 0.4em 0.6em;
   }
   .download-btn {
-    background-color: #6b5b95;
+    background-color: #ffa533;
     color: white;
     border: none;
     padding: 0.25rem 0.5rem;
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
               
               // Добавляем представления
               component.addRepresentation('cartoon', {
-                sele: ":A", color: "#6b5b95", aspectRatio: 2, radius: 1.5
+                sele: ":A", color: "#ffa533", aspectRatio: 2, radius: 1.5
               });
               component.addRepresentation('cartoon', {
                 sele: ":B", color: "#d64161", aspectRatio: 2, radius: 1.5
