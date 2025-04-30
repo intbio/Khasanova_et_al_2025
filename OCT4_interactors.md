@@ -242,8 +242,7 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         // Можно добавить выделение домена для наглядности
         component.addRepresentation('cartoon', {
           sele: dnaBindingDomain.string,
-          color: 'yellow',
-          radius: 0.3
+          color: 'yellow'
         });
         
       } else {
