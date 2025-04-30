@@ -313,7 +313,7 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         
         // Представления структуры
         component.addRepresentation('cartoon', {
-          sele: ":A", color: "#ffa533", aspectRatio: 2, radius: 1.5
+          sele: ":A", color: "#00fffb", aspectRatio: 2, radius: 1.5
         });
         component.addRepresentation('cartoon', {
           sele: ":B", color: "#d3d3d3", aspectRatio: 2, radius: 1.5 
