@@ -7,5 +7,5 @@
 ## AF2 Multimer predictions for binary protein complexes:
 For complexes, if at least one metric fulfils the condition (pDockQ > 0.5, ipSAE > 0.5, ipTM > 0.8), predicted structures and their interactive browsing are available.
 - [Oct4 interactions](OCT4_interactors.md)
-- [Klf4 interactions]()
-- [Sox2 interactions]()
+- [Klf4 interactions](KLF4_interactors.md)
+- [Sox2 interactions](SOX2_interactors.md)
