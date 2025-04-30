@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.stage.viewerControls.spin([0, 1, 0], 0.05);
 
   // Load data from CSV
-  fetch('./oct4_git.csv')
+  fetch('oct4_git.csv')
     .then(response => response.text())
     .then(data => {
       const rows = data.split('\n').slice(1);
