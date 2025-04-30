@@ -53,7 +53,7 @@ description: Predicted by AF2 Multimer structures of Sox2 with nuclear proteins
     padding: 0.4em 0.6em;
   }
   .download-btn {
-    background-color: #00fffb;
+    background-color: #0ca9a7;
     color: white;
     border: none;
     padding: 0.25rem 0.5rem;
@@ -61,7 +61,7 @@ description: Predicted by AF2 Multimer structures of Sox2 with nuclear proteins
     text-decoration: none;
   }
   .download-btn:hover {
-    background-color: #56497a;
+    background-color: #0ca9a7;
     color: white;
   }
   #structures-table thead th.sorting { 
