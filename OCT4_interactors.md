@@ -107,68 +107,85 @@ document.addEventListener('DOMContentLoaded', function() {
     clipDist: 10
   });
   window.stage.viewerControls.spin([0, 1, 0], 0.05);
+  window.structureComponents = {}; // Используем объект вместо массива
 
   // Load data from CSV
   fetch('oct4_git.csv')
-    .then(response => response.text())
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.text();
+    })
     .then(data => {
-      const rows = data.split('\n').slice(1);
+      const rows = data.split('\n').filter(row => row.trim());
+      const headers = rows.shift().split(','); // Получаем заголовки
+      
+      // Initialize DataTable
       const table = $('#structures-table').DataTable({
         responsive: true,
-        pageLength: 10
+        pageLength: 10,
+        data: rows.map(row => {
+          const [gene, uniprot_ac, iptm, ipsae, pdockq, pdbFile] = row.split(',');
+          return [
+            `<input type="checkbox" class="struct-toggle" data-pdb="${pdbFile}" data-gene="${gene}">`,
+            gene,
+            uniprot_ac,
+            `<span class="badge rounded-pill bg-primary badge-score">${iptm}</span>`,
+            `<span class="badge rounded-pill bg-info text-dark badge-score">${ipsae}</span>`,
+            `<span class="badge rounded-pill bg-success badge-score">${pdockq}</span>`,
+            `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
+          ];
+        }),
+        columns: [
+          { title: "View" },
+          { title: "Gene" },
+          { title: "UniProt AC" },
+          { title: "ipTM" },
+          { title: "ipSAE" },
+          { title: "pDockQ" },
+          { title: "PDB" }
+        ]
       });
 
-      rows.forEach((row, index) => {
-        if (!row.trim()) return;
-        
-        const [gene, uniprot_ac, iptm, ipsae, pdockq, pdbFile] = row.split(',');
-        
-        table.row.add([
-          `<input type="checkbox" class="struct-toggle" id="struct-${index}">`,
-          gene,
-          uniprot_ac,
-          `<span class="badge rounded-pill bg-primary badge-score">${iptm}</span>`,
-          `<span class="badge rounded-pill bg-info text-dark badge-score">${ipsae}</span>`,
-          `<span class="badge rounded-pill bg-success badge-score">${pdockq}</span>`,
-          `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
-        ]).draw(false);
-        
-        // Load structure
-        window.stage.loadFile(`structures/OCT4_high_quality/${pdbFile}`).then(function(component) {
-          component.setVisibility(false);
-          component.addRepresentation('cartoon', {
-            sele: ":A",
-            color: "#6b5b95",
-            aspectRatio: 2,
-            radius: 1.5
-          });
-          component.addRepresentation('cartoon', {
-            sele: ":B",
-            color: "#d64161",
-            aspectRatio: 2,
-            radius: 1.5
-          });
-          
-          if (!window.structureComponents) window.structureComponents = [];
-          window.structureComponents[index] = component;
-        });
-      });
-
-      // Toggle visibility
+      // Обработчик для чекбоксов
       $('#structures-table').on('change', '.struct-toggle', function() {
-        const index = $(this).attr('id').split('-')[1];
+        const pdbFile = $(this).data('pdb');
+        const geneName = $(this).data('gene');
         const isChecked = $(this).is(":checked");
         
-        if (window.structureComponents && window.structureComponents[index]) {
-          window.structureComponents[index].setVisibility(isChecked);
-          if (isChecked) {
-            window.structureComponents[index].autoView();
-            const proteinName = $(this).closest('tr').find('td:eq(1)').text();
-            $('#partner-name').text(proteinName);
+        if (isChecked) {
+          if (!window.structureComponents[pdbFile]) {
+            window.stage.loadFile(`structures/OCT4_high_quality/${pdbFile}`)
+              .then(component => {
+                window.structureComponents[pdbFile] = component;
+                component.addRepresentation('cartoon', {
+                  sele: ":A", color: "#6b5b95", aspectRatio: 2, radius: 1.5
+                });
+                component.addRepresentation('cartoon', {
+                  sele: ":B", color: "#d64161", aspectRatio: 2, radius: 1.5
+                });
+                component.autoView();
+                $('#partner-name').text(geneName);
+              })
+              .catch(error => {
+                console.error('Error loading structure:', error);
+                $(this).prop('checked', false);
+                alert('Failed to load structure. Please check console for details.');
+              });
+          } else {
+            window.structureComponents[pdbFile].setVisibility(true);
+            window.structureComponents[pdbFile].autoView();
+            $('#partner-name').text(geneName);
+          }
+        } else {
+          if (window.structureComponents[pdbFile]) {
+            window.structureComponents[pdbFile].setVisibility(false);
           }
         }
       });
     })
-    .catch(error => console.error('Error loading data:', error));
+    .catch(error => {
+      console.error('Error loading data:', error);
+      alert('Failed to load data. Please check console for details.');
+    });
 });
 </script>
