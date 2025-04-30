@@ -53,7 +53,7 @@ description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
     padding: 0.4em 0.6em;
   }
   .download-btn {
-    background-color: #36ff00;
+    background-color: #2d9213;
     color: white;
     border: none;
     padding: 0.25rem 0.5rem;
@@ -61,7 +61,7 @@ description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
     text-decoration: none;
   }
   .download-btn:hover {
-    background-color: #37b815;
+    background-color: #2d9213;
     color: white;
   }
   #structures-table thead th.sorting { 
