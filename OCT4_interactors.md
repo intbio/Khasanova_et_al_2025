@@ -174,64 +174,76 @@ document.addEventListener('DOMContentLoaded', function() {
       const dataRows = rows.slice(1);
 
       // Инициализация таблицы
-      const table = $('#structures-table').DataTable({
+const table = $('#structures-table').DataTable({
   data: dataRows.map(row => {
     const cols = row.split(',');
     if (cols.length < 6) {
       console.warn("Invalid row:", row);
       return null;
     }
+    
     const gene = cols[0].trim();
     const uniprot = cols[1].trim();
     const pdbFile = cols[5].trim();
     
-    return [
-      `<input type="checkbox" class="struct-toggle" data-pdb="${pdbFile}" data-gene="${gene}">`,
-      // Ссылка на GeneCards для Gene
-      `<a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=${gene}" 
-        target="_blank" class="gene-link" title="View in GeneCards">
-        ${gene}
-      </a>`,
-      // Ссылка на UniProt для UniProt AC
-      `<a href="https://www.uniprot.org/uniprotkb/${uniprot}/entry" 
-        target="_blank" class="uniprot-link" title="View in UniProt">
-        ${uniprot}
-      </a>`,
-      `<span class="badge rounded-pill bg-primary">${cols[2].trim()}</span>`,
-      `<span class="badge rounded-pill bg-info text-dark">${cols[3].trim()}</span>`,
-      `<span class="badge rounded-pill bg-success">${cols[4].trim()}</span>`,
-      `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
-    ];
+    return {
+      // Данные для сортировки (должны быть plain text)
+      view: `<input type="checkbox" class="struct-toggle" data-pdb="${pdbFile}" data-gene="${gene}">`,
+      geneText: gene, // Для сортировки
+      uniprotText: uniprot, // Для сортировки
+      geneHtml: `<a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=${gene}" target="_blank" class="gene-link">${gene}</a>`,
+      uniprotHtml: `<a href="https://www.uniprot.org/uniprotkb/${uniprot}/entry" target="_blank" class="uniprot-link">${uniprot}</a>`,
+      ipTM: `<span class="badge rounded-pill bg-primary">${cols[2].trim()}</span>`,
+      ipSAE: `<span class="badge rounded-pill bg-info text-dark">${cols[3].trim()}</span>`,
+      pDockQ: `<span class="badge rounded-pill bg-success">${cols[4].trim()}</span>`,
+      pdb: `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
+    };
   }).filter(Boolean),
   columns: [
-    { title: "View", orderable: false },
     { 
+      data: 'view',
+      title: "View",
+      orderable: false
+    },
+    { 
+      data: 'geneHtml',
       title: "Gene",
-      render: function(data) {
-        // Для корректной сортировки извлекаем текст из ссылки
-        return $(data).text() || data;
+      render: {
+        _: 'geneText', // Для отображения при фильтрации/сортировке
+        display: 'geneHtml' // Для отображения в таблице
       }
     },
     { 
+      data: 'uniprotHtml',
       title: "UniProt AC",
-      render: function(data) {
-        return $(data).text() || data;
+      render: {
+        _: 'uniprotText',
+        display: 'uniprotHtml'
       }
     },
-    { title: "ipTM" },
-    { title: "ipSAE" },
-    { title: "pDockQ" },
-    { title: "PDB", orderable: false }
-  ],
-  columnDefs: [
-    {
-      targets: [1, 2], // Колонки Gene и UniProt AC
-      createdCell: function(td, cellData, rowData, row, col) {
-        // Добавляем атрибуты для ссылок
-        $(td).css('min-width', '120px');
-      }
+    { 
+      data: 'ipTM',
+      title: "ipTM"
+    },
+    { 
+      data: 'ipSAE',
+      title: "ipSAE"
+    },
+    { 
+      data: 'pDockQ',
+      title: "pDockQ"
+    },
+    { 
+      data: 'pdb',
+      title: "PDB",
+      orderable: false
     }
-  ]
+  ],
+  createdRow: function(row, data) {
+    // Добавляем атрибуты для строки
+    $(row).attr('data-gene', data.geneText);
+    $(row).attr('data-uniprot', data.uniprotText);
+  }
 });
 
       // Обработчик чекбоксов с улучшенной загрузкой
