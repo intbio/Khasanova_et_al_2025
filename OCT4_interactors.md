@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ]).draw(false);
         
         // Load structure
-        window.stage.loadFile("structures/OCT4_high_quality/${pdbFile}").then(function(component) {
+        window.stage.loadFile("structures/OCT4_high_quality/" + pdbFile).then(function(component) 
           component.setVisibility(false);
           component.addRepresentation('cartoon', {
             sele: ":A",
