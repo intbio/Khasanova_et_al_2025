@@ -266,81 +266,107 @@ const table = $('#structures-table').DataTable({
 });
 
       // Обработчик чекбоксов с улучшенной загрузкой
-      $('#structures-table').on('change', '.struct-toggle', async function() {
-        const pdbFile = $(this).data('pdb');
-        const geneName = $(this).data('gene');
-        const isChecked = $(this).is(":checked");
+      // Глобальные переменные
+window.selectedProteins = []; // Хранит названия выбранных белков
+window.structureComponents = {}; // Хранит загруженные компоненты
+window.loadedStructures = []; // Хранит загруженные структуры для выравнивания
+
+// Обработчик чекбоксов
+$('#structures-table').on('change', '.struct-toggle', async function() {
+  const pdbFile = $(this).data('pdb');
+  const geneName = $(this).data('gene');
+  const isChecked = $(this).is(":checked");
+  
+  try {
+    if (isChecked) {
+      // Добавляем белок в список выбранных (если ещё не добавлен)
+      if (!window.selectedProteins.some(p => p.name === geneName)) {
+        window.selectedProteins.push({ name: geneName, file: pdbFile });
+      }
+
+      if (!window.structureComponents[pdbFile]) {
+        console.log(`Loading structure: ${pdbFile}`);
         
-        try {
-          if (isChecked) {
-            if (!window.structureComponents[pdbFile]) {
-              console.log(`Loading structure: ${pdbFile}`);
-              
-              // Пробуем разные пути
-              const pathsToTry = [
-                `structures/OCT4_high_quality/${pdbFile}`,
-                `structures/OCT4_high_quality/${pdbFile}.pdb`,
-                pdbFile,
-                `${pdbFile}.pdb`
-              ];
-              
-              let component;
-              for (const path of pathsToTry) {
-                try {
-                  console.log(`Trying path: ${path}`);
-                  component = await window.stage.loadFile(path);
-                  break;
-                } catch (e) {
-                  console.warn(`Failed to load from ${path}:`, e.message);
-                }
-              }
-              
-              if (!component) throw new Error(`All loading attempts failed for ${pdbFile}`);
-              
-              window.structureComponents[pdbFile] = component;
-              window.loadedStructures.push(component.structure);
-              
-              // Добавляем представления
-              component.addRepresentation('cartoon', {
-                sele: ":A", color: "#ffa533", aspectRatio: 2, radius: 1.5
-              });
-              component.addRepresentation('cartoon', {
-                sele: ":B", color: "#d3d3d3", aspectRatio: 2, radius: 1.5
-              });
-              
-              // Выделяем ДНК-связывающий домен
-              const dnaSel = ":A and (143-212 or 231-287)";
-              //component.addRepresentation('ball+stick', {
-                //sele: dnaSel, color: 'yellow', radius: 0.3
-              //});
-              
-              // Выравнивание если есть другие структуры
-              if (window.loadedStructures.length > 1) {
-                try {
-                  await NGL.superpose(
-                    window.loadedStructures,
-                    `${dnaSel} and name CA`
-                  );
-                  console.log("Structures aligned successfully");
-                } catch (superposeError) {
-                  console.warn("Superposition failed:", superposeError);
-                }
-              }
-              
-              component.autoView(dnaSel, 1000);
-            } else {
-              window.structureComponents[pdbFile].setVisibility(true);
-            }
-            $('#partner-name').text(geneName);
-          } else {
-            window.structureComponents[pdbFile]?.setVisibility(false);
+        // Пробуем разные пути загрузки
+        const pathsToTry = [
+          `structures/OCT4_high_quality/${pdbFile}`,
+          `structures/OCT4_high_quality/${pdbFile}.pdb`,
+          pdbFile, 
+          `${pdbFile}.pdb`
+        ];
+        
+        let component;
+        for (const path of pathsToTry) {
+          try {
+            console.log(`Trying path: ${path}`);
+            component = await window.stage.loadFile(path);
+            break;
+          } catch (e) {
+            console.warn(`Failed to load from ${path}:`, e.message);
           }
-        } catch (error) {
-          console.error("Structure loading failed:", error);
-          $(this).prop('checked', false);
-          alert(`Failed to load structure:\n${pdbFile}\nError: ${error.message}`);
         }
-      });
+        
+        if (!component) throw new Error(`All loading attempts failed for ${pdbFile}`);
+        
+        window.structureComponents[pdbFile] = component;
+        window.loadedStructures.push(component.structure);
+        
+        // Представления структуры
+        component.addRepresentation('cartoon', {
+          sele: ":A", color: "#ffa533", aspectRatio: 2, radius: 1.5
+        });
+        component.addRepresentation('cartoon', {
+          sele: ":B", color: "#d3d3d3", aspectRatio: 2, radius: 1.5 
+        });
+        
+        // Выделение ДНК-связывающего домена
+        const dnaSel = ":A and (143-212 or 231-287)";
+        component.autoView(dnaSel, 1000);
+        
+        // Выравнивание если есть другие структуры
+        if (window.loadedStructures.length > 1) {
+          try {
+            await NGL.superpose(
+              window.loadedStructures,
+              `${dnaSel} and name CA`
+            );
+            console.log("Structures aligned successfully");
+          } catch (superposeError) {
+            console.warn("Superposition failed:", superposeError);
+          }
+        }
+      } else {
+        window.structureComponents[pdbFile].setVisibility(true);
+      }
+    } else {
+      // Удаляем белок из списка выбранных
+      window.selectedProteins = window.selectedProteins.filter(p => p.name !== geneName);
+      window.structureComponents[pdbFile]?.setVisibility(false);
+    }
+    
+    // Обновляем заголовок
+    updateProteinTitle();
+    
+  } catch (error) {
+    console.error("Structure loading failed:", error);
+    $(this).prop('checked', false);
+    alert(`Failed to load structure:\n${pdbFile}\nError: ${error.message}`);
+  }
+});
+      // Функция обновления заголовка
+function updateProteinTitle() {
+  const oct4Label = `<span class="oct4-label">OCT4</span>`;
+  
+  if (window.selectedProteins.length === 0) {
+    $('#partner-name').html(`${oct4Label} + <span class="partner-label">Protein Partner</span>`);
+  } else {
+    const partnerLabels = window.selectedProteins.map(protein => 
+      `<span class="partner-label" data-pdb="${protein.file}">${protein.name}</span>`
+    ).join(' + ');
+    
+    $('#partner-name').html(`${oct4Label} + ${partnerLabels}`);
+  }
+}
     })
     .catch(error => {
       console.error("Initialization failed:", error);
