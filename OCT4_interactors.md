@@ -85,6 +85,26 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
   content: "↓";
   opacity: 1;
 }
+  /* Стили для ссылок в таблице */
+.gene-link, .uniprot-link {
+  color: #6b5b95;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  display: inline-block;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.gene-link:hover, .uniprot-link:hover {
+  color: #d64161;
+  text-decoration: underline;
+}
+
+/* Для правильного отображения в DataTables */
+#structures-table td {
+  vertical-align: middle;
+}
 </style>
 
 <div class="header text-center">
