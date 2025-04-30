@@ -100,7 +100,6 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
   try {
-    // 1. Инициализация NGL Viewer
     window.stage = new NGL.Stage("viewport", { 
       backgroundColor: "white",
       clipNear: 0,
@@ -110,19 +109,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.stage.viewerControls.spin([0, 1, 0], 0.05);
     window.structureComponents = {};
 
-    // 2. Загрузка данных CSV
     console.log("Starting CSV data loading...");
     const response = await fetch('oct4_git.csv');
     if (!response.ok) throw new Error(`Failed to load CSV: ${response.status}`);
     const csvData = await response.text();
     
-    // 3. Парсинг CSV
     const rows = csvData.split('\n').filter(row => row.trim());
     if (rows.length < 2) throw new Error("CSV file is empty or has no data");
     const headers = rows[0].split(',');
     const dataRows = rows.slice(1);
 
-    // 4. Инициализация DataTable
     console.log("Initializing DataTable...");
     const table = $('#structures-table').DataTable({
       responsive: true,
@@ -141,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const pdockq = cols[4].trim();
         let pdbFile = cols[5].trim();
         
-        // Убедимся, что имя файла имеет расширение .pdb
+
         if (!pdbFile.toLowerCase().endsWith('.pdb')) {
           pdbFile += '.pdb';
         }
@@ -167,12 +163,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         { title: "PDB", className: "dt-center" }
       ],
       createdRow: function(row, data, dataIndex) {
-        // Добавляем атрибут data-index для отладки
         $(row).attr('data-index', dataIndex);
       }
     });
 
-    // 5. Обработчик чекбоксов с улучшенной обработкой ошибок
     $('#structures-table').on('change', '.struct-toggle', async function() {
       const pdbFile = $(this).data('pdb');
       const geneName = $(this).data('gene');
@@ -182,24 +176,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       try {
         if (isChecked) {
-          // Если структура еще не загружена
           if (!window.structureComponents[pdbFile]) {
             console.log(`Loading structure: ${pdbFile}`);
             
             const filePath = `structures/OCT4_high_quality/${pdbFile}`;
             console.log(`Loading from path: ${filePath}`);
             
-            // Пробуем загрузить с явным указанием формата
             const component = await window.stage.loadFile(filePath, { ext: "pdb" })
               .catch(async error => {
                 console.warn(`First load attempt failed, trying alternative...`, error);
-                // Пробуем альтернативный вариант
                 return await window.stage.loadFile(filePath);
               });
             
             window.structureComponents[pdbFile] = component;
             
-            // Добавляем представления с обработкой ошибок
             try {
               component.addRepresentation('cartoon', {
                 sele: ":A", color: "#6b5b95", aspectRatio: 2, radius: 1.5
@@ -212,12 +202,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
           }
           
-          // Показываем структуру
           window.structureComponents[pdbFile].setVisibility(true);
           window.structureComponents[pdbFile].autoView(500);
           $('#partner-name').text(geneName);
         } else {
-          // Скрываем структуру
           if (window.structureComponents[pdbFile]) {
             window.structureComponents[pdbFile].setVisibility(false);
           }
@@ -226,7 +214,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error(`Error processing ${pdbFile}:`, error);
         $(this).prop('checked', false);
         
-        // Показываем подробное сообщение об ошибке
         alert(`Failed to load structure ${pdbFile}:\n${error.message}\n\nCheck console for details.`);
       }
     });
@@ -235,7 +222,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   } catch (error) {
     console.error("Initialization failed:", error);
     
-    // Показываем ошибку в интерфейсе
     $('#viewport').html(`
       <div class="alert alert-danger p-3">
         <h4>Initialization Error</h4>
