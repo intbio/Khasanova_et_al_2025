@@ -10,7 +10,7 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
     background-color: #f8f9fa;
   }
   .header {
-    background: linear-gradient(135deg, #ffa533 0%, #ff8f00 100%);
+    background: linear-gradient(135deg, #ffa533 0%, #ffd298 100%);
     color: white;
     padding: 2rem 0;
     margin-bottom: 2rem;
@@ -228,9 +228,9 @@ document.addEventListener('DOMContentLoaded', function() {
               
               // Выделяем ДНК-связывающий домен
               const dnaSel = ":A and (143-212 or 231-287)";
-              component.addRepresentation('ball+stick', {
-                sele: dnaSel, color: 'yellow', radius: 0.3
-              });
+              //component.addRepresentation('ball+stick', {
+                //sele: dnaSel, color: 'yellow', radius: 0.3
+              //});
               
               // Выравнивание если есть другие структуры
               if (window.loadedStructures.length > 1) {
