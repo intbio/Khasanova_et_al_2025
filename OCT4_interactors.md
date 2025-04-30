@@ -214,8 +214,6 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
   const geneName = $(this).data('gene');
   const isChecked = $(this).is(":checked");
   
-  console.log(`Toggling ${pdbFile}, checked: ${isChecked}`);
-
   try {
     if (isChecked) {
       if (!window.structureComponents[pdbFile]) {
@@ -239,14 +237,21 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
           radius: 1.5
         });
         
-        // Центрируем именно цепь A (OCT4)
-        const selection = new NGL.Selection(":A"); // Выбираем только цепь A
-        component.autoView(selection, 1000); // Анимация за 1 секунду
+        // Выравниваем по ДНК-связывающему домену OCT4 (цепи A)
+        const dnaBindingDomain = new NGL.Selection("(:A and (143-212 or 231-287))");
+        component.autoView(dnaBindingDomain, 1000); // Анимация 1 сек
+        
+        // Можно добавить выделение домена для наглядности
+        component.addRepresentation('licorice', {
+          sele: dnaBindingDomain.string,
+          color: 'yellow',
+          radius: 0.3
+        });
         
       } else {
         window.structureComponents[pdbFile].setVisibility(true);
-        const selection = new NGL.Selection(":A");
-        window.structureComponents[pdbFile].autoView(selection, 500);
+        const dnaBindingDomain = new NGL.Selection("(:A and (143-212 or 231-287))");
+        window.structureComponents[pdbFile].autoView(dnaBindingDomain, 500);
       }
       $('#partner-name').text(geneName);
     } else {
