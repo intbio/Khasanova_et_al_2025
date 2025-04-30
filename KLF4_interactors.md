@@ -320,7 +320,7 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         });
         
         // Выделение ДНК-связывающего домена
-        const dnaSel = ":A and (143-212 or 231-287)";
+        const dnaSel = ":A and (430-454 or 460-484 or 490-512)";
         component.autoView(dnaSel, 1000);
         
         // Выравнивание если есть другие структуры
