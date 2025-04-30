@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
           `<span class="badge rounded-pill bg-primary badge-score">${iptm}</span>`,
           `<span class="badge rounded-pill bg-info text-dark badge-score">${ipsae}</span>`,
           `<span class="badge rounded-pill bg-success badge-score">${pdockq}</span>`,
-          `<a href="${pdbFile}" class="download-btn" download>Download</a>`
+          `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
         ]).draw(false);
         
         // Load structure
