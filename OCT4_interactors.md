@@ -79,8 +79,8 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
           <th>View</th>
           <th>Gene</th>
           <th>UniProt AC</th>
-          <th>IPTM</th>
-          <th>IPSAE</th>
+          <th>ipTM</th>
+          <th>ipSAE</th>
           <th>pDockQ</th>
           <th>PDB</th>
         </tr>
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ]).draw(false);
         
         // Load structure
-        window.stage.loadFile(pdbFile).then(function(component) {
+        window.stage.loadFile("structures/OCT4_high_quality/${pdbFile}").then(function(component) {
           component.setVisibility(false);
           component.addRepresentation('cartoon', {
             sele: ":A",
