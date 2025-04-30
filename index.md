@@ -1,11 +1,11 @@
 # Supplementary data
-## "XXX" by XXX et al.
+## "ANALYSIS OF PROTEIN-PROTEIN INTERACTIONS OF HUMAN PIONEER TRANSCRIPTION FACTORS BASED ON PREDICTIONS OF THE STRUCTURES OF THEIR COMPLEXES" by Khasanova et al. 2025
 
 ### GitHub repository
-[https://github.com/intbio/PTF_PPI](https://intbio.org/PTF_PPI/)
+[https://github.com/intbio/PTF_PPI](https://intbio.org/Khasanova_et_al_2025/)
 
 ## AF2 Multimer predictions for binary protein complexes:
-The predicted structures and their interactive view are available for complexes with the following metrics: pDockQ > XXX, ipSAE > XXX OR ipTM > XXX. 
+For complexes, if at least one metric fulfils the condition (pDockQ > 0.5, ipSAE > 0.5, ipTM > 0.8), predicted structures and their interactive browsing are available.
 - [Oct4 interactions](OCT4_interactors.md)
 - [Klf4 interactions]()
 - [Sox2 interactions]()
