@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
               });
               
               // Выделяем ДНК-связывающий домен
-              const dnaSel = ":A and (143-212 or 231-287)";
+              const dnaSel = ":A and (430-454 or 460-484 or 490-512)";
               //component.addRepresentation('ball+stick', {
                 //sele: dnaSel, color: 'yellow', radius: 0.3
               //});
