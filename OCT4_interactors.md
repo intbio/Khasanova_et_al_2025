@@ -10,7 +10,7 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
     background-color: #f8f9fa;
   }
   .header {
-    background: linear-gradient(135deg, #ffa533 0%, #ffd298 100%);
+    background: linear-gradient(135deg, #ffa533 0%, #c06c00 100%);
     color: white;
     padding: 2rem 0;
     margin-bottom: 2rem;
