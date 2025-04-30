@@ -209,56 +209,57 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     });
 
-    $('#structures-table').on('change', '.struct-toggle', async function() {
-      const pdbFile = $(this).data('pdb');
-      const geneName = $(this).data('gene');
-      const isChecked = $(this).is(":checked");
-      
-      console.log(`Toggling ${pdbFile}, checked: ${isChecked}`);
+$('#structures-table').on('change', '.struct-toggle', async function() {
+  const pdbFile = $(this).data('pdb');
+  const geneName = $(this).data('gene');
+  const isChecked = $(this).is(":checked");
+  
+  console.log(`Toggling ${pdbFile}, checked: ${isChecked}`);
 
-      try {
-        if (isChecked) {
-          if (!window.structureComponents[pdbFile]) {
-            console.log(`Loading structure: ${pdbFile}`);
-            
-            const filePath = `structures/OCT4_high_quality/${pdbFile}`;
-            console.log(`Loading from path: ${filePath}`);
-            
-            const component = await window.stage.loadFile(filePath, { ext: "pdb" })
-              .catch(async error => {
-                console.warn(`First load attempt failed, trying alternative...`, error);
-                return await window.stage.loadFile(filePath);
-              });
-            
-            window.structureComponents[pdbFile] = component;
-            
-            try {
-              component.addRepresentation('cartoon', {
-                sele: ":A", color: "#6b5b95", aspectRatio: 2, radius: 1.5
-              });
-              component.addRepresentation('cartoon', {
-                sele: ":B", color: "#d64161", aspectRatio: 2, radius: 1.5
-              });
-            } catch (repError) {
-              console.warn("Error adding representations:", repError);
-            }
-          }
-          
-          window.structureComponents[pdbFile].setVisibility(true);
-          window.structureComponents[pdbFile].autoView(500);
-          $('#partner-name').text(geneName);
-        } else {
-          if (window.structureComponents[pdbFile]) {
-            window.structureComponents[pdbFile].setVisibility(false);
-          }
-        }
-      } catch (error) {
-        console.error(`Error processing ${pdbFile}:`, error);
-        $(this).prop('checked', false);
+  try {
+    if (isChecked) {
+      if (!window.structureComponents[pdbFile]) {
+        console.log(`Loading structure: ${pdbFile}`);
         
-        alert(`Failed to load structure ${pdbFile}:\n${error.message}\n\nCheck console for details.`);
+        const filePath = `structures/OCT4_high_quality/${pdbFile}`;
+        const component = await window.stage.loadFile(filePath, { ext: "pdb" });
+        window.structureComponents[pdbFile] = component;
+        
+        // Добавляем представления
+        component.addRepresentation('cartoon', {
+          sele: ":A", 
+          color: "#6b5b95", 
+          aspectRatio: 2, 
+          radius: 1.5
+        });
+        component.addRepresentation('cartoon', {
+          sele: ":B", 
+          color: "#d64161", 
+          aspectRatio: 2, 
+          radius: 1.5
+        });
+        
+        // Центрируем именно цепь A (OCT4)
+        const selection = new NGL.Selection(":A"); // Выбираем только цепь A
+        component.autoView(selection, 1000); // Анимация за 1 секунду
+        
+      } else {
+        window.structureComponents[pdbFile].setVisibility(true);
+        const selection = new NGL.Selection(":A");
+        window.structureComponents[pdbFile].autoView(selection, 500);
       }
-    });
+      $('#partner-name').text(geneName);
+    } else {
+      if (window.structureComponents[pdbFile]) {
+        window.structureComponents[pdbFile].setVisibility(false);
+      }
+    }
+  } catch (error) {
+    console.error(`Error processing ${pdbFile}:`, error);
+    $(this).prop('checked', false);
+    alert(`Failed to load structure ${pdbFile}:\n${error.message}`);
+  }
+});
 
     console.log("Initialization completed successfully");
   } catch (error) {
