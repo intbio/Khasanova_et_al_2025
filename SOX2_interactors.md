@@ -1,7 +1,7 @@
 ---
 layout: default
 title: SOX2 Protein Interactions
-description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
+description: Predicted by AF2 Multimer structures of Sox2 with nuclear proteins
 ---
 
 <style>
@@ -34,10 +34,10 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
     color: #00fffb;
     font-weight: bold;
     text-shadow: 
-    0 0 2px #aa5f00,
-    0 0 2px #aa5f00,
-    0 0 2px #aa5f00,
-    0 0 2px #aa5f00;
+    0 0 2px #0ca9a7,
+    0 0 2px #0ca9a7,
+    0 0 2px #0ca9a7,
+    0 0 2px #0ca9a7;
   }
   .partner-label {
   color: #d3d3d3;
