@@ -91,7 +91,7 @@ description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
   <div class="container">
     <h1>KLF4 Protein Interactions</h1>
     <p>Predicted by AF2 Multimer structures of Oct4 with nuclear proteins</p>
-    <a href="https://intbio.org/PTF_PPI/" class="btn btn-light">Back to Main Site</a>
+    <a href="https://intbio.org/Khasanova_et_al_2025/" class="btn btn-light">Back to Main Site</a>
   </div>
 </div>
 
