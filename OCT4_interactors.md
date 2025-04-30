@@ -119,148 +119,146 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
 <script src="https://unpkg.com/ngl@2.0.0-dev.35/dist/ngl.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', async function() {
-  try {
-    window.stage = new NGL.Stage("viewport", { 
-      backgroundColor: "white",
-      clipNear: 0,
-      clipFar: 100,
-      clipDist: 10
-    });
-    window.stage.viewerControls.spin([0, 1, 0], 0.05);
-    window.structureComponents = {};
-
-    console.log("Starting CSV data loading...");
-    const response = await fetch('oct4_git.csv');
-    if (!response.ok) throw new Error(`Failed to load CSV: ${response.status}`);
-    const csvData = await response.text();
-    
-    const rows = csvData.split('\n').filter(row => row.trim());
-    if (rows.length < 2) throw new Error("CSV file is empty or has no data");
-    const headers = rows[0].split(',');
-    const dataRows = rows.slice(1);
-
-    console.log("Initializing DataTable...");
-    const table = $('#structures-table').DataTable({
-      responsive: true,
-      pageLength: 10,
-      order: [[1, 'asc']], 
-      columnDefs: [
-        {
-          targets: 0, 
-          orderable: false 
-        },
-        {
-          targets: [3, 4, 5], 
-          type: 'num', 
-          render: function(data, type) {
-            if (type === 'sort') {
-              return parseFloat(data.match(/>([0-9.]+)</)[1]);
-            }
-            return data; 
-          }
-        },
-        {
-          targets: 6, 
-          orderable: false 
-        }
-      ],
-      data: dataRows.map((row, index) => {
-        const cols = row.split(',');
-        if (cols.length < 6) {
-          console.warn(`Invalid row ${index}: ${row}`);
-          return null;
-        }
-        
-        const gene = cols[0].trim();
-        const uniprot_ac = cols[1].trim();
-        const iptm = cols[2].trim();
-        const ipsae = cols[3].trim();
-        const pdockq = cols[4].trim();
-        let pdbFile = cols[5].trim();
-        
-
-        if (!pdbFile.toLowerCase().endsWith('.pdb')) {
-          pdbFile += '.pdb';
-        }
-        
-        return [
-          `<input type="checkbox" class="struct-toggle" 
-           data-pdb="${pdbFile}" data-gene="${gene}">`,
-          gene,
-          uniprot_ac,
-          `<span class="badge rounded-pill bg-primary">${iptm}</span>`,
-          `<span class="badge rounded-pill bg-info text-dark">${ipsae}</span>`,
-          `<span class="badge rounded-pill bg-success">${pdockq}</span>`,
-          `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
-        ];
-      }).filter(row => row !== null),
-      columns: [
-        { title: "View", className: "dt-center" },
-        { title: "Gene" },
-        { title: "UniProt AC" },
-        { title: "ipTM", className: "dt-center" },
-        { title: "ipSAE", className: "dt-center" },
-        { title: "pDockQ", className: "dt-center" },
-        { title: "PDB", className: "dt-center" }
-      ],
-      createdRow: function(row, data, dataIndex) {
-        $(row).attr('data-index', dataIndex);
-      }
-    });
-
-$('#structures-table').on('change', '.struct-toggle', async function() {
-  const pdbFile = $(this).data('pdb');
-  const isChecked = $(this).is(":checked");
+document.addEventListener('DOMContentLoaded', function() {
+  // Инициализация
+  window.stage = new NGL.Stage("viewport", {
+    backgroundColor: "white",
+    clipNear: 0,
+    clipFar: 100,
+    clipDist: 10
+  });
+  window.structureComponents = {};
+  window.loadedStructures = [];
   
-  if (isChecked) {
-    if (!window.structureComponents[pdbFile]) {
-      try {
-        const component = await window.stage.loadFile(
-          `structures/OCT4_high_quality/${pdbFile}`, 
-          { ext: "pdb" }
-        );
-        
-        window.structureComponents[pdbFile] = component;
-        window.loadedStructures.push(component.structure);
-        
-        // Представления
-        component.addRepresentation('cartoon', { sele: ":A", color: "#6b5b95" });
-        component.addRepresentation('cartoon', { sele: ":B", color: "#d64161" });
-        
-        // Выравнивание если есть другие структуры
-        if (window.loadedStructures.length > 1) {
-          NGL.superpose(
-            window.loadedStructures,
-            ":A and (143-212 or 231-287) and name CA"
-          );
-        }
-        
-        component.autoView(":A and (143-212 or 231-287)");
-        
-      } catch (error) {
-        console.error("Load error:", error);
-        $(this).prop('checked', false);
-      }
-    } else {
-      window.structureComponents[pdbFile].setVisibility(true);
-    }
-  } else {
-    window.structureComponents[pdbFile]?.setVisibility(false);
-  }
-});
+  // Загрузка данных
+  fetch('oct4_git.csv')
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.text();
+    })
+    .then(csvData => {
+      const rows = csvData.split('\n').filter(row => row.trim());
+      if (rows.length < 2) throw new Error("CSV file is empty or has no data rows");
+      
+      const headers = rows[0].split(',');
+      const dataRows = rows.slice(1);
 
-    console.log("Initialization completed successfully");
-  } catch (error) {
-    console.error("Initialization failed:", error);
-    
-    $('#viewport').html(`
-      <div class="alert alert-danger p-3">
-        <h4>Initialization Error</h4>
-        <p>${error.message}</p>
-        <p class="mb-0">Please check browser console (F12) for details.</p>
-      </div>
-    `);
-  }
+      // Инициализация таблицы
+      const table = $('#structures-table').DataTable({
+        data: dataRows.map(row => {
+          const cols = row.split(',');
+          if (cols.length < 6) {
+            console.warn("Invalid row:", row);
+            return null;
+          }
+          const pdbFile = cols[5].trim();
+          return [
+            `<input type="checkbox" class="struct-toggle" data-pdb="${pdbFile}" data-gene="${cols[0].trim()}">`,
+            cols[0].trim(), // gene
+            cols[1].trim(), // uniprot
+            `<span class="badge rounded-pill bg-primary">${cols[2].trim()}</span>`,
+            `<span class="badge rounded-pill bg-info text-dark">${cols[3].trim()}</span>`,
+            `<span class="badge rounded-pill bg-success">${cols[4].trim()}</span>`,
+            `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
+          ];
+        }).filter(Boolean),
+        columns: [
+          { title: "View", orderable: false },
+          { title: "Gene" },
+          { title: "UniProt AC" },
+          { title: "ipTM" },
+          { title: "ipSAE" },
+          { title: "pDockQ" },
+          { title: "PDB", orderable: false }
+        ]
+      });
+
+      // Обработчик чекбоксов с улучшенной загрузкой
+      $('#structures-table').on('change', '.struct-toggle', async function() {
+        const pdbFile = $(this).data('pdb');
+        const geneName = $(this).data('gene');
+        const isChecked = $(this).is(":checked");
+        
+        try {
+          if (isChecked) {
+            if (!window.structureComponents[pdbFile]) {
+              console.log(`Loading structure: ${pdbFile}`);
+              
+              // Пробуем разные пути
+              const pathsToTry = [
+                `structures/OCT4_high_quality/${pdbFile}`,
+                `structures/OCT4_high_quality/${pdbFile}.pdb`,
+                pdbFile,
+                `${pdbFile}.pdb`
+              ];
+              
+              let component;
+              for (const path of pathsToTry) {
+                try {
+                  console.log(`Trying path: ${path}`);
+                  component = await window.stage.loadFile(path);
+                  break;
+                } catch (e) {
+                  console.warn(`Failed to load from ${path}:`, e.message);
+                }
+              }
+              
+              if (!component) throw new Error(`All loading attempts failed for ${pdbFile}`);
+              
+              window.structureComponents[pdbFile] = component;
+              window.loadedStructures.push(component.structure);
+              
+              // Добавляем представления
+              component.addRepresentation('cartoon', {
+                sele: ":A", color: "#6b5b95", aspectRatio: 2, radius: 1.5
+              });
+              component.addRepresentation('cartoon', {
+                sele: ":B", color: "#d64161", aspectRatio: 2, radius: 1.5
+              });
+              
+              // Выделяем ДНК-связывающий домен
+              const dnaSel = ":A and (143-212 or 231-287)";
+              component.addRepresentation('ball+stick', {
+                sele: dnaSel, color: 'yellow', radius: 0.3
+              });
+              
+              // Выравнивание если есть другие структуры
+              if (window.loadedStructures.length > 1) {
+                try {
+                  await NGL.superpose(
+                    window.loadedStructures,
+                    `${dnaSel} and name CA`
+                  );
+                  console.log("Structures aligned successfully");
+                } catch (superposeError) {
+                  console.warn("Superposition failed:", superposeError);
+                }
+              }
+              
+              component.autoView(dnaSel, 1000);
+            } else {
+              window.structureComponents[pdbFile].setVisibility(true);
+            }
+            $('#partner-name').text(geneName);
+          } else {
+            window.structureComponents[pdbFile]?.setVisibility(false);
+          }
+        } catch (error) {
+          console.error("Structure loading failed:", error);
+          $(this).prop('checked', false);
+          alert(`Failed to load structure:\n${pdbFile}\nError: ${error.message}`);
+        }
+      });
+    })
+    .catch(error => {
+      console.error("Initialization failed:", error);
+      $('#viewport').html(`
+        <div class="alert alert-danger">
+          <h4>Error</h4>
+          <p>${error.message}</p>
+          <p>Check console for details</p>
+        </div>
+      `);
+    });
 });
 </script>
