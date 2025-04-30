@@ -91,6 +91,8 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s;
+  display: inline-block;
+  padding: 2px 0;
 }
 
 .gene-link:hover, .uniprot-link:hover {
@@ -98,10 +100,10 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
   text-decoration: underline;
 }
 
-/* Для правильного отображения в таблице */
-#structures-table td {
-  vertical-align: middle;
-  padding: 8px 12px;
+/* Для DataTables */
+#structures-table th.dt-center, 
+#structures-table td.dt-center {
+  text-align: center;
 }
 </style>
 
@@ -173,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Инициализация таблицы
 const table = $('#structures-table').DataTable({
-  data: dataRows.map(row => {
+  data: dataRows.map((row, index) => {
     const cols = row.split(',');
     if (cols.length < 6) {
       console.warn("Invalid row:", row);
@@ -185,15 +187,15 @@ const table = $('#structures-table').DataTable({
     const pdbFile = cols[5].trim();
     
     return {
-      // Данные для сортировки (должны быть plain text)
-      view: `<input type="checkbox" class="struct-toggle" data-pdb="${pdbFile}" data-gene="${gene}">`,
-      geneText: gene, // Для сортировки
-      uniprotText: uniprot, // Для сортировки
-      geneHtml: `<a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=${gene}" target="_blank" class="gene-link">${gene}</a>`,
-      uniprotHtml: `<a href="https://www.uniprot.org/uniprotkb/${uniprot}/entry" target="_blank" class="uniprot-link">${uniprot}</a>`,
-      ipTM: `<span class="badge rounded-pill bg-primary">${cols[2].trim()}</span>`,
-      ipSAE: `<span class="badge rounded-pill bg-info text-dark">${cols[3].trim()}</span>`,
-      pDockQ: `<span class="badge rounded-pill bg-success">${cols[4].trim()}</span>`,
+      // Данные должны соответствовать названиям в columns.data
+      view: `<input type="checkbox" class="struct-toggle" id="struct-${index}" data-pdb="${pdbFile}" data-gene="${gene}">`,
+      gene: gene, // Простой текст для сортировки
+      gene_link: `<a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=${gene}" target="_blank" class="gene-link">${gene}</a>`,
+      uniprot: uniprot, // Простой текст для сортировки
+      uniprot_link: `<a href="https://www.uniprot.org/uniprotkb/${uniprot}/entry" target="_blank" class="uniprot-link">${uniprot}</a>`,
+      iptm: cols[2].trim(),
+      ipsae: cols[3].trim(),
+      pdockq: cols[4].trim(),
       pdb: `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
     };
   }).filter(Boolean),
@@ -201,46 +203,65 @@ const table = $('#structures-table').DataTable({
     { 
       data: 'view',
       title: "View",
-      orderable: false
+      orderable: false,
+      className: "dt-center"
     },
     { 
-      data: 'geneHtml',
+      data: 'gene_link',
       title: "Gene",
-      render: {
-        _: 'geneText', // Для отображения при фильтрации/сортировке
-        display: 'geneHtml' // Для отображения в таблице
+      render: function(data, type) {
+        // Для сортировки/фильтрации используем plain text
+        if (type === 'sort' || type === 'filter') {
+          return $(data).text() || data;
+        }
+        return data;
       }
     },
     { 
-      data: 'uniprotHtml',
+      data: 'uniprot_link',
       title: "UniProt AC",
-      render: {
-        _: 'uniprotText',
-        display: 'uniprotHtml'
+      render: function(data, type) {
+        if (type === 'sort' || type === 'filter') {
+          return $(data).text() || data;
+        }
+        return data;
       }
     },
     { 
-      data: 'ipTM',
-      title: "ipTM"
+      data: 'iptm',
+      title: "ipTM",
+      render: function(data) {
+        return `<span class="badge rounded-pill bg-primary">${data}</span>`;
+      },
+      className: "dt-center"
     },
     { 
-      data: 'ipSAE',
-      title: "ipSAE"
+      data: 'ipsae',
+      title: "ipSAE",
+      render: function(data) {
+        return `<span class="badge rounded-pill bg-info text-dark">${data}</span>`;
+      },
+      className: "dt-center"
     },
     { 
-      data: 'pDockQ',
-      title: "pDockQ"
+      data: 'pdockq',
+      title: "pDockQ",
+      render: function(data) {
+        return `<span class="badge rounded-pill bg-success">${data}</span>`;
+      },
+      className: "dt-center"
     },
     { 
       data: 'pdb',
       title: "PDB",
-      orderable: false
+      orderable: false,
+      className: "dt-center"
     }
   ],
   createdRow: function(row, data) {
-    // Добавляем атрибуты для строки
-    $(row).attr('data-gene', data.geneText);
-    $(row).attr('data-uniprot', data.uniprotText);
+    // Добавляем data-атрибуты для строки
+    $(row).attr('data-gene', data.gene);
+    $(row).attr('data-uniprot', data.uniprot);
   }
 });
 
