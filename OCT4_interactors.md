@@ -211,55 +211,42 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 $('#structures-table').on('change', '.struct-toggle', async function() {
   const pdbFile = $(this).data('pdb');
-  const geneName = $(this).data('gene');
   const isChecked = $(this).is(":checked");
   
-  try {
-    if (isChecked) {
-      if (!window.structureComponents[pdbFile]) {
-        console.log(`Loading structure: ${pdbFile}`);
+  if (isChecked) {
+    if (!window.structureComponents[pdbFile]) {
+      try {
+        const component = await window.stage.loadFile(
+          `structures/OCT4_high_quality/${pdbFile}`, 
+          { ext: "pdb" }
+        );
         
-        const filePath = `structures/OCT4_high_quality/${pdbFile}`;
-        const component = await window.stage.loadFile(filePath, { ext: "pdb" });
         window.structureComponents[pdbFile] = component;
+        window.loadedStructures.push(component.structure);
         
-        component.addRepresentation('cartoon', {
-          sele: ":A", 
-          color: "#6b5b95", 
-          aspectRatio: 2, 
-          radius: 1.5
-        });
-        component.addRepresentation('cartoon', {
-          sele: ":B", 
-          color: "#d64161", 
-          aspectRatio: 2, 
-          radius: 1.5
-        });
+        // Представления
+        component.addRepresentation('cartoon', { sele: ":A", color: "#6b5b95" });
+        component.addRepresentation('cartoon', { sele: ":B", color: "#d64161" });
         
-        const dnaBindingDomain = new NGL.Selection("(:A and (143-212 or 231-287))");
-        component.autoView(dnaBindingDomain, 1000); // Анимация 1 сек
+        // Выравнивание если есть другие структуры
+        if (window.loadedStructures.length > 1) {
+          NGL.superpose(
+            window.loadedStructures,
+            ":A and (143-212 or 231-287) and name CA"
+          );
+        }
         
-        // Можно добавить выделение домена для наглядности
-        component.addRepresentation('cartoon', {
-          sele: dnaBindingDomain.string,
-          color: 'yellow'
-        });
+        component.autoView(":A and (143-212 or 231-287)");
         
-      } else {
-        window.structureComponents[pdbFile].setVisibility(true);
-        const dnaBindingDomain = new NGL.Selection("(:A and (143-212 or 231-287))");
-        window.structureComponents[pdbFile].autoView(dnaBindingDomain, 500);
+      } catch (error) {
+        console.error("Load error:", error);
+        $(this).prop('checked', false);
       }
-      $('#partner-name').text(geneName);
     } else {
-      if (window.structureComponents[pdbFile]) {
-        window.structureComponents[pdbFile].setVisibility(false);
-      }
+      window.structureComponents[pdbFile].setVisibility(true);
     }
-  } catch (error) {
-    console.error(`Error processing ${pdbFile}:`, error);
-    $(this).prop('checked', false);
-    alert(`Failed to load structure ${pdbFile}:\n${error.message}`);
+  } else {
+    window.structureComponents[pdbFile]?.setVisibility(false);
   }
 });
 
