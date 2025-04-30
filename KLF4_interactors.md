@@ -84,6 +84,26 @@ description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
   #structures-table thead th.sorting_desc:after {
   content: "↓";
   opacity: 1;
+  }
+/* Стили для ссылок */
+.gene-link, .uniprot-link {
+  color: #6b5b95;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: inline-block;
+  padding: 2px 0;
+}
+
+.gene-link:hover, .uniprot-link:hover {
+  color: #d64161;
+  text-decoration: underline;
+}
+
+/* Для DataTables */
+#structures-table th.dt-center, 
+#structures-table td.dt-center {
+  text-align: center;
 }
 </style>
 
@@ -154,111 +174,201 @@ document.addEventListener('DOMContentLoaded', function() {
       const dataRows = rows.slice(1);
 
       // Инициализация таблицы
-      const table = $('#structures-table').DataTable({
-        data: dataRows.map(row => {
-          const cols = row.split(',');
-          if (cols.length < 6) {
-            console.warn("Invalid row:", row);
-            return null;
-          }
-          const pdbFile = cols[5].trim();
-          return [
-            `<input type="checkbox" class="struct-toggle" data-pdb="${pdbFile}" data-gene="${cols[0].trim()}">`,
-            cols[0].trim(), // gene
-            cols[1].trim(), // uniprot
-            `<span class="badge rounded-pill bg-primary">${cols[2].trim()}</span>`,
-            `<span class="badge rounded-pill bg-info text-dark">${cols[3].trim()}</span>`,
-            `<span class="badge rounded-pill bg-success">${cols[4].trim()}</span>`,
-            `<a href="structures/KLF4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
-          ];
-        }).filter(Boolean),
-        columns: [
-          { title: "View", orderable: false },
-          { title: "Gene" },
-          { title: "UniProt AC" },
-          { title: "ipTM" },
-          { title: "ipSAE" },
-          { title: "pDockQ" },
-          { title: "PDB", orderable: false }
-        ]
-      });
+const table = $('#structures-table').DataTable({
+  data: dataRows.map((row, index) => {
+    const cols = row.split(',');
+    if (cols.length < 6) {
+      console.warn("Invalid row:", row);
+      return null;
+    }
+    
+    const gene = cols[0].trim();
+    const uniprot = cols[1].trim();
+    const pdbFile = cols[5].trim();
+    
+    return {
+      // Данные должны соответствовать названиям в columns.data
+      view: `<input type="checkbox" class="struct-toggle" id="struct-${index}" data-pdb="${pdbFile}" data-gene="${gene}">`,
+      gene: gene, // Простой текст для сортировки
+      gene_link: `<a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=${gene}" target="_blank" class="gene-link">${gene}</a>`,
+      uniprot: uniprot, // Простой текст для сортировки
+      uniprot_link: `<a href="https://www.uniprot.org/uniprotkb/${uniprot}/entry" target="_blank" class="uniprot-link">${uniprot}</a>`,
+      iptm: cols[2].trim(),
+      ipsae: cols[3].trim(),
+      pdockq: cols[4].trim(),
+      pdb: `<a href="structures/KLF4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
+    };
+  }).filter(Boolean),
+  columns: [
+    { 
+      data: 'view',
+      title: "View",
+      orderable: false,
+      className: "dt-center"
+    },
+    { 
+      data: 'gene_link',
+      title: "Gene",
+      render: function(data, type) {
+        // Для сортировки/фильтрации используем plain text
+        if (type === 'sort' || type === 'filter') {
+          return $(data).text() || data;
+        }
+        return data;
+      }
+    },
+    { 
+      data: 'uniprot_link',
+      title: "UniProt AC",
+      render: function(data, type) {
+        if (type === 'sort' || type === 'filter') {
+          return $(data).text() || data;
+        }
+        return data;
+      }
+    },
+    { 
+      data: 'iptm',
+      title: "ipTM",
+      render: function(data) {
+        return `<span class="badge rounded-pill bg-primary">${data}</span>`;
+      },
+      className: "dt-center"
+    },
+    { 
+      data: 'ipsae',
+      title: "ipSAE",
+      render: function(data) {
+        return `<span class="badge rounded-pill bg-info text-dark">${data}</span>`;
+      },
+      className: "dt-center"
+    },
+    { 
+      data: 'pdockq',
+      title: "pDockQ",
+      render: function(data) {
+        return `<span class="badge rounded-pill bg-success">${data}</span>`;
+      },
+      className: "dt-center"
+    },
+    { 
+      data: 'pdb',
+      title: "PDB",
+      orderable: false,
+      className: "dt-center"
+    }
+  ],
+  createdRow: function(row, data) {
+    // Добавляем data-атрибуты для строки
+    $(row).attr('data-gene', data.gene);
+    $(row).attr('data-uniprot', data.uniprot);
+  }
+});
 
       // Обработчик чекбоксов с улучшенной загрузкой
-      $('#structures-table').on('change', '.struct-toggle', async function() {
-        const pdbFile = $(this).data('pdb');
-        const geneName = $(this).data('gene');
-        const isChecked = $(this).is(":checked");
+      // Глобальные переменные
+window.selectedProteins = []; // Хранит названия выбранных белков
+window.structureComponents = {}; // Хранит загруженные компоненты
+window.loadedStructures = []; // Хранит загруженные структуры для выравнивания
+
+// Обработчик чекбоксов
+$('#structures-table').on('change', '.struct-toggle', async function() {
+  const pdbFile = $(this).data('pdb');
+  const geneName = $(this).data('gene');
+  const isChecked = $(this).is(":checked");
+  
+  try {
+    if (isChecked) {
+      // Добавляем белок в список выбранных (если ещё не добавлен)
+      if (!window.selectedProteins.some(p => p.name === geneName)) {
+        window.selectedProteins.push({ name: geneName, file: pdbFile });
+      }
+
+      if (!window.structureComponents[pdbFile]) {
+        console.log(`Loading structure: ${pdbFile}`);
         
-        try {
-          if (isChecked) {
-            if (!window.structureComponents[pdbFile]) {
-              console.log(`Loading structure: ${pdbFile}`);
-              
-              // Пробуем разные пути
-              const pathsToTry = [
-                `structures/KLF4_high_quality/${pdbFile}`,
-                `structures/KLF4_high_quality/${pdbFile}.pdb`,
-                pdbFile,
-                `${pdbFile}.pdb`
-              ];
-              
-              let component;
-              for (const path of pathsToTry) {
-                try {
-                  console.log(`Trying path: ${path}`);
-                  component = await window.stage.loadFile(path);
-                  break;
-                } catch (e) {
-                  console.warn(`Failed to load from ${path}:`, e.message);
-                }
-              }
-              
-              if (!component) throw new Error(`All loading attempts failed for ${pdbFile}`);
-              
-              window.structureComponents[pdbFile] = component;
-              window.loadedStructures.push(component.structure);
-              
-              // Добавляем представления
-              component.addRepresentation('cartoon', {
-                sele: ":A", color: "#36ff00", aspectRatio: 2, radius: 1.5
-              });
-              component.addRepresentation('cartoon', {
-                sele: ":B", color: "#d3d3d3", aspectRatio: 2, radius: 1.5
-              });
-              
-              // Выделяем ДНК-связывающий домен
-              const dnaSel = ":A and (430-454 or 460-484 or 490-512)";
-              //component.addRepresentation('ball+stick', {
-                //sele: dnaSel, color: 'yellow', radius: 0.3
-              //});
-              
-              // Выравнивание если есть другие структуры
-              if (window.loadedStructures.length > 1) {
-                try {
-                  await NGL.superpose(
-                    window.loadedStructures,
-                    `${dnaSel} and name CA`
-                  );
-                  console.log("Structures aligned successfully");
-                } catch (superposeError) {
-                  console.warn("Superposition failed:", superposeError);
-                }
-              }
-              
-              component.autoView(dnaSel, 1000);
-            } else {
-              window.structureComponents[pdbFile].setVisibility(true);
-            }
-            $('#partner-name').text(geneName);
-          } else {
-            window.structureComponents[pdbFile]?.setVisibility(false);
+        // Пробуем разные пути загрузки
+        const pathsToTry = [
+          `structures/KLF4_high_quality/${pdbFile}`,
+          `structures/KLF4_high_quality/${pdbFile}.pdb`,
+          pdbFile, 
+          `${pdbFile}.pdb`
+        ];
+        
+        let component;
+        for (const path of pathsToTry) {
+          try {
+            console.log(`Trying path: ${path}`);
+            component = await window.stage.loadFile(path);
+            break;
+          } catch (e) {
+            console.warn(`Failed to load from ${path}:`, e.message);
           }
-        } catch (error) {
-          console.error("Structure loading failed:", error);
-          $(this).prop('checked', false);
-          alert(`Failed to load structure:\n${pdbFile}\nError: ${error.message}`);
         }
-      });
+        
+        if (!component) throw new Error(`All loading attempts failed for ${pdbFile}`);
+        
+        window.structureComponents[pdbFile] = component;
+        window.loadedStructures.push(component.structure);
+        
+        // Представления структуры
+        component.addRepresentation('cartoon', {
+          sele: ":A", color: "#36ff00", aspectRatio: 2, radius: 1.5
+        });
+        component.addRepresentation('cartoon', {
+          sele: ":B", color: "#d3d3d3", aspectRatio: 2, radius: 1.5 
+        });
+        
+        // Выделение ДНК-связывающего домена
+        const dnaSel = ":A and (143-212 or 231-287)";
+        component.autoView(dnaSel, 1000);
+        
+        // Выравнивание если есть другие структуры
+        if (window.loadedStructures.length > 1) {
+          try {
+            await NGL.superpose(
+              window.loadedStructures,
+              `${dnaSel} and name CA`
+            );
+            console.log("Structures aligned successfully");
+          } catch (superposeError) {
+            console.warn("Superposition failed:", superposeError);
+          }
+        }
+      } else {
+        window.structureComponents[pdbFile].setVisibility(true);
+      }
+    } else {
+      // Удаляем белок из списка выбранных
+      window.selectedProteins = window.selectedProteins.filter(p => p.name !== geneName);
+      window.structureComponents[pdbFile]?.setVisibility(false);
+    }
+    
+    // Обновляем заголовок
+    updateProteinTitle();
+    
+  } catch (error) {
+    console.error("Structure loading failed:", error);
+    $(this).prop('checked', false);
+    alert(`Failed to load structure:\n${pdbFile}\nError: ${error.message}`);
+  }
+});
+      // Функция обновления заголовка
+// Функция обновления заголовка
+function updateProteinTitle() {
+  if (window.selectedProteins.length === 0) {
+    // Если ничего не выбрано, показываем стандартный текст
+    $('#partner-name').html(`<span class="partner-label">Protein Partner</span>`);
+  } else {
+    // Формируем список выбранных партнеров
+    const partnerLabels = window.selectedProteins.map(protein => 
+      `<span class="partner-label" data-pdb="${protein.file}">${protein.name}</span>`
+    ).join(' + ');
+    
+    // Обновляем заголовок (без повторного KLF4)
+    $('#partner-name').html(partnerLabels);
+  }
+}
     })
     .catch(error => {
       console.error("Initialization failed:", error);
