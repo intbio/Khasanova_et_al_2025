@@ -264,6 +264,14 @@ const table = $('#structures-table').DataTable({
     $(row).attr('data-uniprot', data.uniprot);
   }
 });
+      // Автоматически загрузить первую структуру после инициализации таблицы
+table.on('init.dt', function() {
+  const firstRow = table.row(0).data();
+  if (firstRow) {
+    const firstCheckbox = $('#structures-table .struct-toggle').first();
+    firstCheckbox.prop('checked', true).trigger('change');
+  }
+});
 
       // Обработчик чекбоксов с улучшенной загрузкой
       // Глобальные переменные
@@ -380,13 +388,5 @@ function updateProteinTitle() {
         </div>
       `);
     });
-  // Автоматически загрузить первую структуру после инициализации таблицы
-table.on('init.dt', function() {
-  const firstRow = table.row(0).data();
-  if (firstRow) {
-    const firstCheckbox = $('#structures-table .struct-toggle').first();
-    firstCheckbox.prop('checked', true).trigger('change');
-  }
-});
 });
 </script>
