@@ -264,17 +264,17 @@ const table = $('#structures-table').DataTable({
     $(row).attr('data-uniprot', data.uniprot);
   }
 });
-      // Автоматически загрузить первую структуру после инициализации таблицы
-table.on('init.dt', function() {
-  const firstRow = table.row(0).data();
-  if (firstRow) {
-    const firstCheckbox = $('#structures-table .struct-toggle').first();
+
+// Автоматическая загрузка первой структуры
+setTimeout(() => {
+  const firstCheckbox = $('#structures-table .struct-toggle').first();
+  if (firstCheckbox.length) {
     firstCheckbox.prop('checked', true).trigger('change');
   }
-});
-
-      // Обработчик чекбоксов с улучшенной загрузкой
-      // Глобальные переменные
+}, 500);
+      
+// Обработчик чекбоксов с улучшенной загрузкой
+// Глобальные переменные
 window.selectedProteins = []; // Хранит названия выбранных белков
 window.structureComponents = {}; // Хранит загруженные компоненты
 window.loadedStructures = []; // Хранит загруженные структуры для выравнивания
