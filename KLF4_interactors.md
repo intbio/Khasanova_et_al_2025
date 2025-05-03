@@ -264,14 +264,18 @@ const table = $('#structures-table').DataTable({
     $(row).attr('data-uniprot', data.uniprot);
   }
 });
-
-      // Обработчик чекбоксов с улучшенной загрузкой
-      // Глобальные переменные
+// Автоматическая загрузка первой структуры
+setTimeout(() => {
+  const firstCheckbox = $('#structures-table .struct-toggle').first();
+  if (firstCheckbox.length) {
+    firstCheckbox.prop('checked', true).trigger('change');
+  }
+}, 500);
+      
 window.selectedProteins = []; // Хранит названия выбранных белков
 window.structureComponents = {}; // Хранит загруженные компоненты
 window.loadedStructures = []; // Хранит загруженные структуры для выравнивания
 
-// Обработчик чекбоксов
 $('#structures-table').on('change', '.struct-toggle', async function() {
   const pdbFile = $(this).data('pdb');
   const geneName = $(this).data('gene');
@@ -279,7 +283,6 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
   
   try {
     if (isChecked) {
-      // Добавляем белок в список выбранных (если ещё не добавлен)
       if (!window.selectedProteins.some(p => p.name === geneName)) {
         window.selectedProteins.push({ name: geneName, file: pdbFile });
       }
@@ -287,7 +290,6 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
       if (!window.structureComponents[pdbFile]) {
         console.log(`Loading structure: ${pdbFile}`);
         
-        // Пробуем разные пути загрузки
         const pathsToTry = [
           `structures/KLF4_high_quality/${pdbFile}`,
           `structures/KLF4_high_quality/${pdbFile}.pdb`,
