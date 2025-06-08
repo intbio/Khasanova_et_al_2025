@@ -197,7 +197,7 @@ const table = $('#structures-table').DataTable({
       iptm: cols[2].trim(),
       ipsae: cols[3].trim(),
       pdockq: cols[4].trim(),
-      trcoord: cols[5].trim(),
+      trcoord: cols[5].trim().replace(/^"|"$/g, ''),
       pdb: `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
     };
   }).filter(Boolean),
