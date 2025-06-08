@@ -285,8 +285,8 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         console.log(`Loading structure: ${pdbFile}`);
         
         const pathsToTry = [
-          `structures/klf4_dtot/${pdbFile}`,
-          `structures/klf4_dtot/${pdbFile}.pdb`,
+          `structures/KLF4_dtot/${pdbFile}`,
+          `structures/KLF4_dtot/${pdbFile}.pdb`,
           pdbFile, 
           `${pdbFile}.pdb`
         ];
