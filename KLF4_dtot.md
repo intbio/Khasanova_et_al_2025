@@ -115,7 +115,7 @@ description: AF2-predicted structures of Klf4 complexes with nuclear proteins re
 
 <div class="container">
   <div class="protein-title text-center">
-    <span class="klf4-label">klf4</span> + 
+    <span class="klf4-label">KLF4</span> + 
     <span class="partner-label" id="partner-name">Protein Partner</span>
   </div>
   <div id="viewport"></div>
@@ -191,7 +191,7 @@ const table = $('#structures-table').DataTable({
       ipsae: cols[3].trim(),
       pdockq: cols[4].trim(),
       trcoord: cols[5].trim().replace(/^"|"$/g, ''),
-      pdb: `<a href="structures/klf4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
+      pdb: `<a href="structures/KLF4_dtot/${pdbFile}" class="download-btn" download>Download</a>`
     };
   }).filter(Boolean),
   columns: [
