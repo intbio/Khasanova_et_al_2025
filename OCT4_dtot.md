@@ -1,7 +1,7 @@
 ---
 layout: default
 title: OCT4 Protein Interactions
-description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
+description: AF2-predicted structures of Oct4 complexes with nuclear proteins revealed a disorder-to-order transition
 ---
 
 <style>
@@ -110,7 +110,7 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
 <div class="header text-center">
   <div class="container">
     <h1>OCT4 Protein Interactions</h1>
-    <p>Predicted by AF2 Multimer structures of Oct4 with nuclear proteins</p>
+    <p>AF2-predicted structures of Oct4 complexes with nuclear proteins revealed a disorder-to-order transition</p>
     <a href="https://intbio.org/Khasanova_et_al_2025/" class="btn btn-light">Back to Main Site</a>
   </div>
 </div>
@@ -198,7 +198,7 @@ const table = $('#structures-table').DataTable({
       ipsae: cols[3].trim(),
       pdockq: cols[4].trim(),
       trcoord: cols[5].trim().replace(/^"|"$/g, ''),
-      pdb: `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
+      pdb: `<a href="structures/OCT4_dtot/${pdbFile}" class="download-btn" download>Download</a>`
     };
   }).filter(Boolean),
   columns: [
