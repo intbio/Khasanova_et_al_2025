@@ -275,6 +275,14 @@ const table = $('#structures-table').DataTable({
   }
 });
 
+// Автоматическая загрузка первой структуры
+setTimeout(() => {
+  const firstCheckbox = $('#structures-table .struct-toggle').first();
+  if (firstCheckbox.length) {
+    firstCheckbox.prop('checked', true).trigger('change');
+  }
+}, 500);
+      
 window.selectedProteins = []; // Хранит названия выбранных белков
 window.structureComponents = {}; // Хранит загруженные компоненты
 window.loadedStructures = []; // Хранит загруженные структуры для выравнивания
