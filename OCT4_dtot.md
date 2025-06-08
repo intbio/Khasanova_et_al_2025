@@ -1,7 +1,7 @@
 ---
 layout: default
 title: OCT4 Protein Interactions
-description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
+description: AF2-predicted structures of Oct4 complexes with nuclear proteins revealed a disorder-to-order transition
 ---
 
 <style>
@@ -110,7 +110,7 @@ description: Predicted by AF2 Multimer structures of Oct4 with nuclear proteins
 <div class="header text-center">
   <div class="container">
     <h1>OCT4 Protein Interactions</h1>
-    <p>Predicted by AF2 Multimer structures of Oct4 with nuclear proteins</p>
+    <p>AF2-predicted structures of Oct4 complexes with nuclear proteins revealed a disorder-to-order transition</p>
     <a href="https://intbio.org/Khasanova_et_al_2025/" class="btn btn-light">Back to Main Site</a>
   </div>
 </div>
@@ -197,8 +197,8 @@ const table = $('#structures-table').DataTable({
       iptm: cols[2].trim(),
       ipsae: cols[3].trim(),
       pdockq: cols[4].trim(),
-      trcoord: cols[5].trim(),
-      pdb: `<a href="structures/OCT4_high_quality/${pdbFile}" class="download-btn" download>Download</a>`
+      trcoord: cols[5].trim().replace(/^"|"$/g, ''),
+      pdb: `<a href="structures/OCT4_dtot/${pdbFile}" class="download-btn" download>Download</a>`
     };
   }).filter(Boolean),
   columns: [
@@ -275,8 +275,14 @@ const table = $('#structures-table').DataTable({
   }
 });
 
-      // Обработчик чекбоксов с улучшенной загрузкой
-      // Глобальные переменные
+// Автоматическая загрузка первой структуры
+setTimeout(() => {
+  const firstCheckbox = $('#structures-table .struct-toggle').first();
+  if (firstCheckbox.length) {
+    firstCheckbox.prop('checked', true).trigger('change');
+  }
+}, 500);
+      
 window.selectedProteins = []; // Хранит названия выбранных белков
 window.structureComponents = {}; // Хранит загруженные компоненты
 window.loadedStructures = []; // Хранит загруженные структуры для выравнивания
@@ -289,7 +295,6 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
   
   try {
     if (isChecked) {
-      // Добавляем белок в список выбранных (если ещё не добавлен)
       if (!window.selectedProteins.some(p => p.name === geneName)) {
         window.selectedProteins.push({ name: geneName, file: pdbFile });
       }
@@ -297,10 +302,9 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
       if (!window.structureComponents[pdbFile]) {
         console.log(`Loading structure: ${pdbFile}`);
         
-        // Пробуем разные пути загрузки
         const pathsToTry = [
-          `structures/OCT4_high_quality/${pdbFile}`,
-          `structures/OCT4_high_quality/${pdbFile}.pdb`,
+          `structures/OCT4_dtot/${pdbFile}`,
+          `structures/OCT4_dtot/${pdbFile}.pdb`,
           pdbFile, 
           `${pdbFile}.pdb`
         ];
@@ -321,7 +325,6 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         window.structureComponents[pdbFile] = component;
         window.loadedStructures.push(component.structure);
         
-        // Представления структуры
         component.addRepresentation('cartoon', {
           sele: ":A", color: "#ffa533", aspectRatio: 2, radius: 1.5
         });
@@ -329,11 +332,9 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
           sele: ":B", color: "#d3d3d3", aspectRatio: 2, radius: 1.5 
         });
         
-        // Выделение ДНК-связывающего домена
         const dnaSel = ":A and (143-212 or 231-287)";
         component.autoView(dnaSel, 1000);
         
-        // Выравнивание если есть другие структуры
         if (window.loadedStructures.length > 1) {
           try {
             await NGL.superpose(
@@ -349,12 +350,10 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         window.structureComponents[pdbFile].setVisibility(true);
       }
     } else {
-      // Удаляем белок из списка выбранных
       window.selectedProteins = window.selectedProteins.filter(p => p.name !== geneName);
       window.structureComponents[pdbFile]?.setVisibility(false);
     }
     
-    // Обновляем заголовок
     updateProteinTitle();
     
   } catch (error) {
@@ -363,19 +362,14 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
     alert(`Failed to load structure:\n${pdbFile}\nError: ${error.message}`);
   }
 });
-      // Функция обновления заголовка
-// Функция обновления заголовка
 function updateProteinTitle() {
   if (window.selectedProteins.length === 0) {
-    // Если ничего не выбрано, показываем стандартный текст
     $('#partner-name').html(`<span class="partner-label">Protein Partner</span>`);
   } else {
-    // Формируем список выбранных партнеров
     const partnerLabels = window.selectedProteins.map(protein => 
       `<span class="partner-label" data-pdb="${protein.file}">${protein.name}</span>`
     ).join(' + ');
     
-    // Обновляем заголовок (без повторного OCT4)
     $('#partner-name').html(partnerLabels);
   }
 }
