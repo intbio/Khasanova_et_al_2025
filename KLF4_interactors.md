@@ -1,7 +1,7 @@
 ---
 layout: default
 title: KLF4 Protein Interactions
-description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
+description: Predicted by AF2 Multimer structures of Klf4 with nuclear proteins
 ---
 
 <style>
@@ -85,7 +85,6 @@ description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
   content: "↓";
   opacity: 1;
   }
-/* Стили для ссылок */
 .gene-link, .uniprot-link {
   color: #6b5b95;
   text-decoration: none;
@@ -100,7 +99,6 @@ description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
   text-decoration: underline;
 }
 
-/* Для DataTables */
 #structures-table th.dt-center, 
 #structures-table td.dt-center {
   text-align: center;
@@ -137,7 +135,6 @@ description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
         </tr>
       </thead>
       <tbody>
-        <!-- Data will be loaded dynamically -->
       </tbody>
     </table>
   </div>
@@ -150,7 +147,6 @@ description: Predicted by AF2 Multimer structures of Klf44 with nuclear proteins
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Инициализация
   window.stage = new NGL.Stage("viewport", {
     backgroundColor: "white",
     clipNear: 0,
@@ -160,7 +156,6 @@ document.addEventListener('DOMContentLoaded', function() {
   window.structureComponents = {};
   window.loadedStructures = [];
   
-  // Загрузка данных
   fetch('klf4_git.csv')
     .then(response => {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -173,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const headers = rows[0].split(',');
       const dataRows = rows.slice(1);
 
-      // Инициализация таблицы
 const table = $('#structures-table').DataTable({
   data: dataRows.map((row, index) => {
     const cols = row.split(',');
@@ -187,11 +181,10 @@ const table = $('#structures-table').DataTable({
     const pdbFile = cols[5].trim();
     
     return {
-      // Данные должны соответствовать названиям в columns.data
       view: `<input type="checkbox" class="struct-toggle" id="struct-${index}" data-pdb="${pdbFile}" data-gene="${gene}">`,
-      gene: gene, // Простой текст для сортировки
+      gene: gene, 
       gene_link: `<a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=${gene}" target="_blank" class="gene-link">${gene}</a>`,
-      uniprot: uniprot, // Простой текст для сортировки
+      uniprot: uniprot, 
       uniprot_link: `<a href="https://www.uniprot.org/uniprotkb/${uniprot}/entry" target="_blank" class="uniprot-link">${uniprot}</a>`,
       iptm: cols[2].trim(),
       ipsae: cols[3].trim(),
@@ -210,7 +203,6 @@ const table = $('#structures-table').DataTable({
       data: 'gene_link',
       title: "Gene",
       render: function(data, type) {
-        // Для сортировки/фильтрации используем plain text
         if (type === 'sort' || type === 'filter') {
           return $(data).text() || data;
         }
@@ -259,12 +251,10 @@ const table = $('#structures-table').DataTable({
     }
   ],
   createdRow: function(row, data) {
-    // Добавляем data-атрибуты для строки
     $(row).attr('data-gene', data.gene);
     $(row).attr('data-uniprot', data.uniprot);
   }
 });
-// Автоматическая загрузка первой структуры
 setTimeout(() => {
   const firstCheckbox = $('#structures-table .struct-toggle').first();
   if (firstCheckbox.length) {
@@ -272,9 +262,9 @@ setTimeout(() => {
   }
 }, 500);
       
-window.selectedProteins = []; // Хранит названия выбранных белков
-window.structureComponents = {}; // Хранит загруженные компоненты
-window.loadedStructures = []; // Хранит загруженные структуры для выравнивания
+window.selectedProteins = []; 
+window.structureComponents = {}; 
+window.loadedStructures = []; 
 
 $('#structures-table').on('change', '.struct-toggle', async function() {
   const pdbFile = $(this).data('pdb');
@@ -313,7 +303,6 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         window.structureComponents[pdbFile] = component;
         window.loadedStructures.push(component.structure);
         
-        // Представления структуры
         component.addRepresentation('cartoon', {
           sele: ":A", color: "#36ff00", aspectRatio: 2, radius: 1.5
         });
@@ -325,7 +314,6 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         const dnaSel = ":A and (430-454 or 460-484 or 490-512)";
         component.autoView(dnaSel, 1000);
         
-        // Выравнивание если есть другие структуры
         if (window.loadedStructures.length > 1) {
           try {
             await NGL.superpose(
@@ -341,12 +329,10 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         window.structureComponents[pdbFile].setVisibility(true);
       }
     } else {
-      // Удаляем белок из списка выбранных
       window.selectedProteins = window.selectedProteins.filter(p => p.name !== geneName);
       window.structureComponents[pdbFile]?.setVisibility(false);
     }
     
-    // Обновляем заголовок
     updateProteinTitle();
     
   } catch (error) {
@@ -355,19 +341,14 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
     alert(`Failed to load structure:\n${pdbFile}\nError: ${error.message}`);
   }
 });
-      // Функция обновления заголовка
-// Функция обновления заголовка
 function updateProteinTitle() {
   if (window.selectedProteins.length === 0) {
-    // Если ничего не выбрано, показываем стандартный текст
     $('#partner-name').html(`<span class="partner-label">Protein Partner</span>`);
   } else {
-    // Формируем список выбранных партнеров
     const partnerLabels = window.selectedProteins.map(protein => 
       `<span class="partner-label" data-pdb="${protein.file}">${protein.name}</span>`
     ).join(' + ');
     
-    // Обновляем заголовок (без повторного KLF4)
     $('#partner-name').html(partnerLabels);
   }
 }
