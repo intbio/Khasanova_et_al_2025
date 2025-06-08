@@ -6,7 +6,7 @@
 
 ## AF2 Multimer predictions for binary protein complexes:
 For complexes, if at least one metric fulfils the condition (pDockQ > 0.5, ipSAE > 0.5, ipTM > 0.8), predicted structures and their interactive browsing are available.
-- [## Oct4 interactions](OCT4_interactors.md) ([download summary table](oct4_git.csv), [download structures (ZIP-archive)](structures/high_oct4.zip))
+- [**Oct4 interactions**](OCT4_interactors.md) ([download summary table](oct4_git.csv), [download structures (ZIP-archive)](structures/high_oct4.zip))
   - [Oct4 disorder-to-order transition](OCT4_dtot.md) ([download summary table](oct4_dtot_git.csv), [download structures (ZIP-archive)](structures/oct4_dtot_compl.zip))
 - [Klf4 interactions](KLF4_interactors.md) ([download summary table](klf4_git.csv), [download structures (ZIP-archive)](structures/high_klf4.zip))
   - [Klf4 disorder-to-order transition](KLF4_dtot.md) ([download summary table](klf4_dtot_git.csv), [download structures (ZIP-archive)](structures/klf4_dtot_compl.zip))
