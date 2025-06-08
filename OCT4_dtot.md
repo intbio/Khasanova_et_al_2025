@@ -299,8 +299,8 @@ $('#structures-table').on('change', '.struct-toggle', async function() {
         
         // Пробуем разные пути загрузки
         const pathsToTry = [
-          `structures/OCT4_high_quality/${pdbFile}`,
-          `structures/OCT4_high_quality/${pdbFile}.pdb`,
+          `structures/OCT4_dtot/${pdbFile}`,
+          `structures/OCT4_dtot/${pdbFile}.pdb`,
           pdbFile, 
           `${pdbFile}.pdb`
         ];
