@@ -266,6 +266,13 @@ const table = $('#structures-table').DataTable({
   }
 });
 
+setTimeout(() => {
+  const firstCheckbox = $('#structures-table .struct-toggle').first();
+  if (firstCheckbox.length) {
+    firstCheckbox.prop('checked', true).trigger('change');
+  }
+}, 500);
+
 window.selectedProteins = []; 
 window.structureComponents = {}; 
 window.loadedStructures = []; 
