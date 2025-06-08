@@ -179,7 +179,7 @@ const table = $('#structures-table').DataTable({
     
     const gene = cols[0].trim();
     const uniprot = cols[1].trim();
-    const pdbFile = cols[6].trim().replace(".pdb", "");
+    const pdbFile = cols[6].trim().slice(0, -4);
     
     return {
       view: `<input type="checkbox" class="struct-toggle" id="struct-${index}" data-pdb="${pdbFile}" data-gene="${gene}">`,
